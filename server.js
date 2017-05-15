@@ -18,15 +18,18 @@ app.get('/urlshortener/:url(*)', function (req, res) {
       if (err) throw err;
       if (db) {
           if (url.substring(0,8) == "https://" || url.substring(0,7) == "http://")
-          {db.collection("url").count({}, 
+          {if (url.match(/[.]/) == null || url.substring(url.length-2, url.length).match(/[.]/) !== null) {
+              res.send("Sorry, there seems to be an error in your url, please try again.")
+          } else {
+              db.collection("url").count({}, 
           function(err, count){if (err) throw err;
           var shortUrl = "https://api-developments-ruja.c9users.io/urlshortener/" + (count + 1);
           var toAdd = {"original_url": url, 
           "short_url": shortUrl};
           res.send(JSON.stringify(toAdd));
           db.collection("url").insert(toAdd);
-              
-          });
+          
+          });}
          
       }
       else {db.collection("url").count({"short_url" : "https://api-developments-ruja.c9users.io/urlshortener/" + url}, function(err, count) {
